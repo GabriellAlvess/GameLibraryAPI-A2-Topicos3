@@ -26,10 +26,10 @@
 
     <p>O corpo da requisição deve conter:</p>
     <pre><code>
-{
-  "email": "seuemail@example.com",
-  "password": "suaSenha"
-}
+    {
+      "email": "seuemail@example.com",
+      "password": "suaSenha"
+    }
     </code></pre>
 
     <p>Em caso de sucesso, a API retornará um token JWT que deve ser utilizado no cabeçalho <code>Authorization</code> para acessar os endpoints protegidos:</p>
