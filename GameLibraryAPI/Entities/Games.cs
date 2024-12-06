@@ -30,11 +30,16 @@ namespace GameLibraryAPI.Entities
         public double AverageRating => Reviews.Any() ? Reviews.Average(r => r.Rating) : 0.0;
         public bool isDeleted { get; set; }
 
-        public void Update(string title, string description )
+        /// <summary>
+        /// Atualiza as propriedades do jogo.
+        /// </summary>
+        public void Update(string title, string description, Developer developer, List<Genre> genres)
         { 
             Title = title;
             Description = description;
-            
+            Developer = developer;
+            // Substitui a lista de gêneros existente
+            Genres = genres ?? new List<Genre>();
         }
 
         public void Delete()

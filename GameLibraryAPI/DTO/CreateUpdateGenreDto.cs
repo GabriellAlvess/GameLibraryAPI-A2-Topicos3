@@ -11,4 +11,10 @@
         public string Name { get; set; }
         public bool IsDeleted { get; set; }
     }
+
+    public class GenreResponseWithoutDeletedDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
 }

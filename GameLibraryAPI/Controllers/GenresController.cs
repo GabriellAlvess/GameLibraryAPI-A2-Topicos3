@@ -21,13 +21,28 @@ namespace GameLibraryAPI.Controllers
         ///  Mostra todos os gêneros de jogos cadastrados e que não foram deletados.
         /// </summary>
         /// <remarks>
-        ///  Retorno:
-        ///  
+        /// Exemplo de resposta JSON:
+        /// 
+        ///     GET
+        ///     [
+        ///         {
+        ///             "id": 1,
+        ///             "name": "Genero 1",
+        ///             "isDeleted": false
+        ///         },
+        ///         {
+        ///             "id": 2,
+        ///             "name": "Genero 2",
+        ///             "isDeleted": false
+        ///         }
+        ///     ]
         /// </remarks>
         /// <response code="200">Retorna os generos cadastrados.</response>
         /// <response code="400">Para casos com erro.</response>
         [HttpGet]
-        public IActionResult GetAll()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetAll()
         {
             var genres = _context.Genres
                 .Where(g => !g.IsDeleted)
@@ -45,13 +60,22 @@ namespace GameLibraryAPI.Controllers
         ///  Mostra o gênero pelo id informado.
         /// </summary>
         /// <remarks>
-        ///  Retorno:
-        ///  
+        /// Exemplo de resposta JSON:
+        /// 
+        ///     GET
+        ///     {
+        ///         "id": 1,
+        ///         "name": "Adventure",
+        ///         "isDeleted": false
+        ///     }
+        /// 
         /// </remarks>
         ///<response code="200">Retorna o genero cadastrado.</response>
         ///<response code="400">Para casos com erro.</response>
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetById(int id)
         {
             var genre = _context.Genres
                 .Where(g => g.Id == id && !g.IsDeleted)
@@ -75,6 +99,13 @@ namespace GameLibraryAPI.Controllers
         /// Cria um novo gênero.
         /// </summary>
         /// <remarks>
+        /// Exemplo de corpo de requisição:
+        /// 
+        ///     POST
+        ///     {
+        ///         "name": "New Developer"
+        ///     }
+        ///     
         /// Exemplo de resposta JSON:
         /// 
         ///     POST
@@ -121,9 +152,15 @@ namespace GameLibraryAPI.Controllers
         /// Faz a atualização do gênero informado.
         /// </summary>
         /// <remarks>
-        /// Exemplo de resposta JSON:
+        /// Exemplo de corpo de requisição:
         /// 
         ///     PUT
+        ///     {
+        ///         "name": "Updated Developer"
+        ///     }
+        ///     
+        ///Exemplo de resposta JSON:
+        ///
         ///     {
         ///         "id": 1,
         ///         "name": "New Genre Name",
@@ -168,11 +205,12 @@ namespace GameLibraryAPI.Controllers
         ///  Deleta o gênero informado.
         /// </summary>
         /// <remarks>
-        ///  Retorno:
-        ///  
+        /// Este método define o status `isDeleted` da desenvolvedora como `true`.
         /// </remarks>
+        /// <response code="204">Gênero deletado com sucesso.</response>
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> Delete(int id)
         {
             var genre = _context.Genres.SingleOrDefault(g => g.Id == id);
             if (genre == null)
@@ -180,6 +218,8 @@ namespace GameLibraryAPI.Controllers
                 return NotFound();
             }
             genre.Delete();
+            await _context.SaveChangesAsync();
+
             return NoContent();
         }
 
