@@ -58,6 +58,9 @@ namespace GameLibraryAPI.Persistence
                     "UserLibrary",
                     j => j.HasOne<Games>().WithMany().HasForeignKey("GameId"),
                     j => j.HasOne<User>().WithMany().HasForeignKey("UserId"));
+
+  
         }
+
     }
 }

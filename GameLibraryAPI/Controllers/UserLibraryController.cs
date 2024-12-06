@@ -40,9 +40,9 @@ namespace GameLibraryAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> AddGameToLibrary(int id, int gameId)
+        public async Task<IActionResult> AddGameToLibrary(int userId, int gameId)
         {
-            var user = await _context.Users.Include(u => u.Library).SingleOrDefaultAsync(u => u.Id == id);
+            var user = await _context.Users.Include(u => u.Library).SingleOrDefaultAsync(u => u.Id == userId);
             if (user == null)
             {
                 return NotFound(new { Message = "User not found" });
@@ -210,7 +210,7 @@ namespace GameLibraryAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> GetLibrary(int id)
+        public async Task<IActionResult> GetLibrary(int userId)
         {
             // Busca o usuário e sua biblioteca
             var user = await _context.Users
@@ -218,7 +218,7 @@ namespace GameLibraryAPI.Controllers
                 .ThenInclude(g => g.Developer) 
                 .Include(u => u.Library)
                 .ThenInclude(g => g.Genres) 
-                .SingleOrDefaultAsync(u => u.Id == id);
+                .SingleOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
             {
@@ -245,6 +245,54 @@ namespace GameLibraryAPI.Controllers
 
             return Ok(library);
         }
+
+        /// <summary>
+        /// Remove um jogo da biblioteca de um usuário.
+        /// </summary>
+        /// <remarks>
+        /// Exemplo de resposta JSON:
+        /// 
+        ///     DELETE
+        ///     {
+        ///         "message": "Game removed from library"
+        ///     }
+        /// </remarks>
+        /// <response code="200">Jogo removido com sucesso.</response>
+        /// <response code="404">Usuário ou jogo não encontrado.</response>
+        /// <response code="400">Jogo não está na biblioteca do usuário.</response>
+        /// <response code="401">Não autorizado, faça login.</response>
+        [Authorize]
+        [HttpDelete("{userId}/library/{gameId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> RemoveGameFromLibrary(int userId, int gameId)
+        {
+            // Busca o usuário e sua biblioteca
+            var user = await _context.Users
+                .Include(u => u.Library)
+                .SingleOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+            {
+                return NotFound(new { Message = "User not found" });
+            }
+
+            // Verifica se o jogo está na biblioteca do usuário
+            var game = user.Library.SingleOrDefault(g => g.Id == gameId);
+            if (game == null)
+            {
+                return BadRequest(new { Message = "Game not in user's library" });
+            }
+
+            // Remove o jogo da biblioteca
+            user.Library.Remove(game);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "Game removed from library" });
+        }
+
 
     }
 }
