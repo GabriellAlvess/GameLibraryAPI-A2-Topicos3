@@ -1,6 +1,7 @@
 ﻿using GameLibraryAPI.DTO;
 using GameLibraryAPI.Entities;
 using GameLibraryAPI.Persistence;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,9 +34,12 @@ namespace GameLibraryAPI.Controllers
         ///     ]
         /// </remarks>
         /// <response code="200">Retorna os usuários cadastrados.</response>
+        /// <response code="401">Não autorizado, faça login.</response>
+        [Authorize]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetAll()
         {
             var users = await _context.Users
@@ -66,9 +70,12 @@ namespace GameLibraryAPI.Controllers
         /// </remarks>
         /// <response code="200">Retorna o usuário solicitado.</response>
         /// <response code="404">Usuário não encontrado.</response>
+        /// <response code="401">Não autorizado, faça login.</response>
+        [Authorize]
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetUserById(int id)
         {
             var user = await _context.Users
@@ -117,6 +124,12 @@ namespace GameLibraryAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Post([FromBody] CreateUpdateUserDto userDto)
         {
+            // Verifica se o email já existe
+            if (await _context.Users.AnyAsync(u => u.Email == userDto.Email))
+            {
+                return BadRequest(new { Message = "Email already in use" });
+            }
+
             var user = new User
             {
                 Id = 0, // Força o EF a gerar o ID
@@ -161,9 +174,12 @@ namespace GameLibraryAPI.Controllers
         /// </remarks>
         /// <response code="200">Usuário atualizado com sucesso.</response>
         /// <response code="404">Usuário não encontrado.</response>
+        /// <response code="401">Não autorizado, faça login.</response>
+        [Authorize]
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Update(int id, [FromBody] CreateUpdateUserDto userDto)
         {
             var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == id);
@@ -193,9 +209,12 @@ namespace GameLibraryAPI.Controllers
         /// </remarks>
         /// <response code="204">Usuário deletado com sucesso.</response>
         /// <response code="404">Usuário não encontrado.</response>
+        /// <response code="401">Não autorizado, faça login.</response>
+        [Authorize]
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Delete(int id)
         {
             var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == id);

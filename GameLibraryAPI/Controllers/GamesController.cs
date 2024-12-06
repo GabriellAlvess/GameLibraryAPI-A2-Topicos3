@@ -2,6 +2,7 @@
 using GameLibraryAPI.Dtos;
 using GameLibraryAPI.Entities;
 using GameLibraryAPI.Persistence;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -90,9 +91,12 @@ public class GamesController : ControllerBase
     /// </remarks>
     /// <response code="200">Retorna o jogo solicitado.</response>
     /// <response code="404">Jogo não encontrado.</response>
+    /// <response code="401">Não autorizado, faça login.</response>
+    [Authorize]
     [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetById(int id)
     {
         var game = _context.Games
@@ -154,9 +158,12 @@ public class GamesController : ControllerBase
     /// </remarks>
     /// <response code="201">Jogo criado com sucesso.</response>
     /// <response code="400">Dados inválidos.</response>
+    /// <response code="401">Não autorizado, faça login.</response>
+    [Authorize]
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Post([FromBody] CreateUpdatGameDto gameDto)
     {
         var developer = _context.Developers.SingleOrDefault(d => d.Id == gameDto.DeveloperId);
@@ -219,9 +226,12 @@ public class GamesController : ControllerBase
     /// </remarks>
     /// <response code="200">Jogo atualizado com sucesso.</response>
     /// <response code="404">Jogo não encontrado.</response>
+    /// <response code="401">Não autorizado, faça login.</response>
+    [Authorize]
     [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Update(int id, [FromBody] CreateUpdatGameDto gameDto)
     {
         var game = await _context.Games.Include(g => g.Genres).Include(g => g.Developer).SingleOrDefaultAsync(g => g.Id == id);
@@ -259,9 +269,12 @@ public class GamesController : ControllerBase
     /// </remarks>
     /// <response code="204">Jogo deletado com sucesso.</response>
     /// <response code="404">Jogo não encontrado.</response>
+    /// <response code="401">Não autorizado, faça login.</response>
+    [Authorize]
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Delete(int id)
     {
         var game = _context.Games.SingleOrDefault(g => g.Id == id);

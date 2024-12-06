@@ -2,6 +2,7 @@
 using GameLibraryAPI.Dtos;
 using GameLibraryAPI.Entities;
 using GameLibraryAPI.Persistence;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,10 +33,13 @@ namespace GameLibraryAPI.Controllers
         /// <response code="200">Jogo adicionado com sucesso.</response>
         /// <response code="404">Usuário ou jogo não encontrado.</response>
         /// <response code="400">Jogo já está na biblioteca do usuário.</response>
-        [HttpPost("{id}/library/{gameId}")]
+        /// <response code="401">Não autorizado, faça login.</response>
+        [Authorize]
+        [HttpPost("{userId}/library/{gameId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> AddGameToLibrary(int id, int gameId)
         {
             var user = await _context.Users.Include(u => u.Library).SingleOrDefaultAsync(u => u.Id == id);
@@ -89,11 +93,14 @@ namespace GameLibraryAPI.Controllers
         /// <response code="404">Usuário ou jogo não encontrado.</response>
         /// <response code="400">Jogo não está na biblioteca do usuário.</response>
         /// <response code="409">Usuário já avaliou este jogo.</response>
+        /// <response code="401">Não autorizado, faça login.</response>
+        [Authorize]
         [HttpPost("{gameId}/review")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> AddReview(int userId, int gameId, [FromBody] AddReviewDto reviewDto)
         {
             // Verifica se o usuário existe e carrega sua biblioteca
@@ -181,8 +188,6 @@ namespace GameLibraryAPI.Controllers
         }
 
 
-
-
         /// <summary>
         /// Mostra a biblioteca de um usuário com os jogos que ele adicionou.
         /// </summary>
@@ -199,9 +204,12 @@ namespace GameLibraryAPI.Controllers
         /// </remarks>
         /// <response code="200">Biblioteca retornada com sucesso.</response>
         /// <response code="404">Usuário não encontrado.</response>
-        [HttpGet("{id}/library")]
+        /// <response code="401">Não autorizado, faça login.</response>
+        [Authorize]
+        [HttpGet("{userId}/library")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetLibrary(int id)
         {
             // Busca o usuário e sua biblioteca

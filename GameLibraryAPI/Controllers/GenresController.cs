@@ -1,6 +1,7 @@
 ﻿using GameLibraryAPI.DTO;
 using GameLibraryAPI.Entities;
 using GameLibraryAPI.Persistence;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,9 +40,12 @@ namespace GameLibraryAPI.Controllers
         /// </remarks>
         /// <response code="200">Retorna os generos cadastrados.</response>
         /// <response code="400">Para casos com erro.</response>
+        /// <response code="401">Não autorizado, faça login.</response>
+        [Authorize]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetAll()
         {
             var genres = _context.Genres
@@ -72,9 +76,12 @@ namespace GameLibraryAPI.Controllers
         /// </remarks>
         ///<response code="200">Retorna o genero cadastrado.</response>
         ///<response code="400">Para casos com erro.</response>
+        ///<response code="401">Não autorizado, faça login.</response>
+        [Authorize]
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetById(int id)
         {
             var genre = _context.Genres
@@ -118,9 +125,12 @@ namespace GameLibraryAPI.Controllers
         /// </remarks>
         /// <response code="201">Gênero criado com sucesso.</response>
         /// <response code="400">Requisição inválida.</response>
+        /// <response code="401">Não autorizado, faça login.</response>
+        [Authorize]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Post([FromBody] CreateUpdateGenreDto genreDto)
         {
             // Cria uma nova instância de Genre
@@ -170,9 +180,12 @@ namespace GameLibraryAPI.Controllers
         /// </remarks>
         /// <response code="200">Gênero atualizado com sucesso.</response>
         /// <response code="404">Gênero não encontrado.</response>
+        /// <response code="401">Não autorizado, faça login.</response>
+        [Authorize]
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Update(int id, [FromBody] CreateUpdateGenreDto genreDto)
         {
             // Busca o gênero pelo ID
@@ -208,8 +221,11 @@ namespace GameLibraryAPI.Controllers
         /// Este método define o status `isDeleted` da desenvolvedora como `true`.
         /// </remarks>
         /// <response code="204">Gênero deletado com sucesso.</response>
+        /// <response code="401">Não autorizado, faça login.</response>
+        [Authorize]
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Delete(int id)
         {
             var genre = _context.Genres.SingleOrDefault(g => g.Id == id);

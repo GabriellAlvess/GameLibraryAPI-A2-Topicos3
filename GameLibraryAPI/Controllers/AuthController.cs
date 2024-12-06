@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using GameLibraryAPI.DTO;
+using GameLibraryAPI.Entities;
+using GameLibraryAPI.Persistence;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -11,10 +15,12 @@ namespace GameLibraryAPI.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IConfiguration _configuration;
+        private readonly GamesLibraryDbContext _context;
 
-        public AuthController(IConfiguration configuration)
+        public AuthController(IConfiguration configuration, GamesLibraryDbContext context)
         {
             _configuration = configuration;
+            _context = context;
         }
 
         /// <summary>
@@ -25,36 +31,38 @@ namespace GameLibraryAPI.Controllers
         /// 
         ///     POST
         ///     {
-        ///         "username": "admin",
+        ///         "email": "johndoe@example.com",
         ///         "password": "1234"
         ///     }
         /// </remarks>
         /// <response code="200">Retorna o token JWT.</response>
         /// <response code="401">Credenciais inválidas.</response>
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginDto loginDto)
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
-            // Autenticação fictícia para fins didáticos
-            if (loginDto.Username == "admin" && loginDto.Password == "1234")
+            // Valida o usuário
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == loginDto.Email && u.Password == loginDto.Password);
+            if (user == null)
             {
-                var token = GenerateJwtToken(loginDto.Username);
-                return Ok(new { Token = token });
+                return Unauthorized(new { Message = "Invalid credentials" });
             }
 
-            return Unauthorized(new { Message = "Invalid credentials" });
+            // Gera o token JWT
+            var token = GenerateJwtToken(user.Email);
+            return Ok(new { Token = token });
         }
 
         /// <summary>
         /// Gera um token JWT.
         /// </summary>
-        private string GenerateJwtToken(string username)
+        private string GenerateJwtToken(string email)
         {
-            var key = Encoding.UTF8.GetBytes("ChaveSecretaParaDidatica12345"); // Use a mesma chave definida no Program.cs
+            var key = Encoding.UTF8.GetBytes("ChaveSecretaParaJWTMuitoSeguraEGrande12345678");
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-                    new Claim(ClaimTypes.Name, username)
+                    new Claim(ClaimTypes.Email, email)
                 }),
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -65,11 +73,5 @@ namespace GameLibraryAPI.Controllers
 
             return tokenHandler.WriteToken(token);
         }
-    }
-
-    public class LoginDto
-    {
-        public string Username { get; set; }
-        public string Password { get; set; }
     }
 }

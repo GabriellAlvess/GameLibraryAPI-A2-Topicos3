@@ -13,7 +13,7 @@ builder.Services.AddDbContext<GamesLibraryDbContext>(options =>
     options.UseInMemoryDatabase("GameLibraryDb"));
 
 // Configuração da chave secreta para JWT
-var secretKey = "ChaveSecretaParaDidatica12345"; // Chave simples para fins didáticos
+var secretKey = "ChaveSecretaParaJWTMuitoSeguraEGrande12345678"; // Chave simples para fins didáticos
 var key = Encoding.UTF8.GetBytes(secretKey);
 
 builder.Services.AddAuthentication(options =>
